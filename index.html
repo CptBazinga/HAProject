@@ -28,7 +28,7 @@
         function ShowAll()  
         {  
                 var connection = new ActiveXObject("ADODB.Connection");  
-                var connectionstring = "Data Source=.;Initial Catalog=EmpDetail;Persist Security Info=True;User ID=sa;Password=****;Provider=SQLOLEDB";  
+                var connectionstring = "Data Source=database-1.cixaez8np9ic.eu-central-1.rds.amazonaws.com;Initial Catalog=EmpDetail;Persist Security Info=True;User ID=admin;Password=12345678;Provider=SQLOLEDB"; 
                 connection.Open(connectionstring);  
                 var rs = new ActiveXObject("ADODB.Recordset");  
                 rs.Open("select * from myTable ", connection);  
