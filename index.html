@@ -9,20 +9,20 @@
             var txtname = document.getElementById('txtname').value;  
             var txtsalary = document.getElementById('txtsalary').value;  
             var txtcity = document.getElementById('txtcity').value;  
-            if (txtid.length != 0 || txtname.length !=0 || txtsalary.length !=0|| txtcity.length !=0)  
+            if (txtid.length != 0 || txtname.length !=0)  
             {  
                 var connection = new ActiveXObject("ADODB.Connection");  
-                var connectionstring = "Data Source=.;Initial Catalog=EmpDetail;Persist Security Info=True;User ID=sa;Password=****;Provider=SQLOLEDB";  
+                var connectionstring = "Data Source=database-1.cixaez8np9ic.eu-central-1.rds.amazonaws.com;Initial Catalog=EmpDetail;Persist Security Info=True;User ID=admin;Password=12345678;Provider=SQLOLEDB";  
                 connection.Open(connectionstring);  
                 var rs = new ActiveXObject("ADODB.Recordset");  
-                rs.Open("insert into Emp_Info values('" + txtid + "','" + txtname + "','" + txtsalary + "','" + txtcity + "')", connection);  
+                rs.Open("insert into myTable values('" + txtid + "','" + txtname + "')", connection);  
                 alert("Insert Record Successfuly");  
                 txtid.value = " ";  
                 connection.close();  
             }  
             else  
             {              
-                alert("Please Enter Employee \n Id \n Name \n Salary \n City ");  
+                alert("Please Enter Employee \n Id \n Name");  
             }  
         }  
         function ShowAll()  
@@ -31,17 +31,17 @@
                 var connectionstring = "Data Source=.;Initial Catalog=EmpDetail;Persist Security Info=True;User ID=sa;Password=****;Provider=SQLOLEDB";  
                 connection.Open(connectionstring);  
                 var rs = new ActiveXObject("ADODB.Recordset");  
-                rs.Open("select * from Emp_Info ", connection);  
+                rs.Open("select * from myTable ", connection);  
                 rs.MoveFirst();  
                 var span = document.createElement("span");  
                 span.style.color = "Blue";  
-                span.innerText = "  ID " + "  Name " + "  Salary" + " City ";  
+                span.innerText = "  ID " + "  Name ";  
                 document.body.appendChild(span);  
                 while (!rs.eof)  
                 {  
                     var span = document.createElement("span");  
                     span.style.color = "green";  
-                    span.innerText = "\n " + rs.fields(0) + " |  " + rs.fields(1) + " |  " + rs.fields(2) + " |  " + rs.fields(3);  
+                    span.innerText = "\n " + rs.fields(0) + " |  " + rs.fields(1);  
                     document.body.appendChild(span);  
                     rs.MoveNext();  
                 }  
