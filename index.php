@@ -6,7 +6,7 @@
 <body>
 	<center>
 		<h1>Storing Form data in Database | This Instance's IP is $(hostname -f)</h1>
-		<form action="index.php" method="post">
+		<form action="insert.php" method="post">
 			
 <p>
 			<label for="firstName">Name:</label>
