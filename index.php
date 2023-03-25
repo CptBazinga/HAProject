@@ -28,11 +28,11 @@ $user = 'admin';
 $password = '12345678';
 
 // Database name is geeksforgeeks
-$database = 'TestRDS';
+$database = 'myDB';
 
 // Server is localhost with
 // port number 3306
-$servername='database-1.cixaez8np9ic.eu-central-1.rds.amazonaws.com';
+$servername='database-2.cixaez8np9ic.eu-central-1.rds.amazonaws.com';
 $mysqli = new mysqli($servername, $user,
 				$password, $database);
 
