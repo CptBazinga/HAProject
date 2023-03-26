@@ -13,7 +13,7 @@
 		// username => root
 		// password => empty
 		// database name => staff
-		$conn = mysqli_connect("database-1.cixaez8np9ic.eu-central-1.rds.amazonaws.com", "admin", "12345678", "TestRDS");
+		$conn = mysqli_connect("database-1.cixaez8np9ic.eu-central-1.rds.amazonaws.com", "admin", "12345678", "TestDB");
 		
 		// Check connection
 		if($conn === false){
