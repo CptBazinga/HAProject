@@ -5,7 +5,8 @@
 </head>
 <body>
 	<center>
-		<h1>Storing Form data in Database | This Instance's IP is $(hostname -f)</h1>
+		<h1>Mohammed Waleed Eleraky\nCloud Infrastructure As a Code IaC\nBachelor Project</h1>
+		<h2>Storing Form data in Database</h2>
 		<form action="insert.php" method="post">
 			
 <p>
