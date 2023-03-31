@@ -12,13 +12,13 @@
 			
 <p>
 			<label for="firstName">Name:</label>
-			<input type="text" name="first_name" id="firstName">
+			<input type="text" name="first_name" id="first_name">
 			</p>
 
 			
 <p>
 			<label for="lastName">Comment:</label>
-			<input type="text" name="last_name" id="lastName">
+			<input type="text" name="last_name" id="last_name">
 			</p>
 
 			<input type="submit" value="Submit">
