@@ -11,13 +11,13 @@
 		<form action="insert.php" method="post">
 			
 <p>
-			<label for="firstName">Name:</label>
+			<label for="first_name">Name:</label>
 			<input type="text" name="first_name" id="first_name">
 			</p>
 
 			
 <p>
-			<label for="lastName">Comment:</label>
+			<label for="last_name">Comment:</label>
 			<input type="text" name="last_name" id="last_name">
 			</p>
 
