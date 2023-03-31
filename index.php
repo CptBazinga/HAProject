@@ -6,7 +6,7 @@
 <body>
 	<center>
 		
-		<h1>Mohammed Waleed Eleraky \n Cloud Infrastructure As a Code IaC \n Bachelor Project</h1>
+		<h1>Mohammed Waleed Eleraky <br> Cloud Infrastructure As a Code IaC <br> Bachelor Project</h1>
 		<h2>Storing Form data in Database</h2>
 		<form action="insert.php" method="post">
 			
