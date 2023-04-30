@@ -1,9 +1,9 @@
 #!/bin/bash
 
-steamcmd_dir="~/steamcmd"
-install_dir="~/dontstarvetogether_dedicated_server"
+steamcmd_dir="/home/ubuntu/steamcmd"
+install_dir="/home/ubuntu/dontstarvetogether_dedicated_server"
 cluster_name="MyDediServer"
-dontstarve_dir="~/.klei/DoNotStarveTogether"
+dontstarve_dir="/home/ubuntu/.klei/DoNotStarveTogether"
 
 function fail()
 {
