@@ -234,24 +234,7 @@ Resources:
         FromPort: 0
         ToPort: 65535
         CidrIp: 0.0.0.0/0
-
-  DBSecGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: The SG for the DB
-      VpcId: !Ref MainVPC
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 3306
-        ToPort: 3306
-        CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-      - IpProtocol: tcp
-        FromPort: 0
-        ToPort: 65535
-        CidrIp: 0.0.0.0/0
         
-
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -336,32 +319,6 @@ Resources:
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId: !Ref MainVPC
-
-  database1:
-    Type: AWS::RDS::DBInstance
-    Properties: 
-      AllocatedStorage: 20
-      AllowMajorVersionUpgrade: true
-      AutoMinorVersionUpgrade: true
-      AvailabilityZone: eu-central-1a
-      DBInstanceClass: db.t3.micro
-      DBInstanceIdentifier: database-1
-      DBName: myDB
-      DBSecurityGroups: 
-        - !Ref DBSecGroup
-      DBSubnetGroupName: !Ref PublicSubnet1
-      Engine: MySQL
-      MasterUsername: 'admin'
-      ManageMasterUserPassword: true
-      MasterUserPassword: '12345678'
-      MaxAllocatedStorage: 22
-      NetworkType: 'IPV4'
-      Port: '3306'
-      StorageEncrypted: true
-      StorageType: 'gp2'
-      VPCSecurityGroups: 
-        - !Ref DBSecGroup
-
 
 #The Outputs
 Outputs:
