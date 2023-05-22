@@ -1,0 +1,393 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "HA-Project"
+Parameters:
+  VpcNetCIDR:
+    Default: ""
+    Type: String
+
+  EnvironmentName:
+    Default: ""
+    Type: String
+    
+  PubSubnet01CIDR:
+    Default: ""
+    Type: String
+    
+  PubSubnet02CIDR:
+    Default: ""
+    Type: String
+    
+  PrivSubnet01CIDR:
+    Default: ""
+    Type: String
+    
+  PrivSubnet02CIDR:
+    Default: ""
+    Type: String
+
+
+Resources:
+  MainVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcNetCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: "Name"
+          Value: "MainVPC"
+
+  InternetGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "InternetGW"
+
+  IGWAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGW
+      VpcId: !Ref MainVPC
+      
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MainVPC
+      AvailabilityZone: 'eu-central-1a'
+      CidrBlock: !Ref PubSubnet01CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'Name'
+          Value: 'PublicSubnet1'
+          
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MainVPC
+      AvailabilityZone: 'eu-central-1b'
+      CidrBlock: !Ref PubSubnet02CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'Name'
+          Value: 'PublicSubnet2'
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MainVPC
+      AvailabilityZone: !Sub 'eu-central-1a'
+      CidrBlock: !Ref PrivSubnet01CIDR
+      Tags:
+        - Key: 'Name'
+          Value: 'PrivateSubnet1'
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MainVPC
+      AvailabilityZone: !Sub 'eu-central-1b'
+      CidrBlock: !Ref PrivSubnet02CIDR
+      Tags:
+        - Key: 'Name'
+          Value: 'PrivateSubnet2'
+
+  NatGwEIP01:
+    Type: AWS::EC2::EIP
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "NatGwEIP01"
+    DependsOn: IGWAttach
+
+  NatGwEIP02:
+    Type: AWS::EC2::EIP
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "NatGwEIP02"
+    DependsOn: IGWAttach
+
+  NatGw01:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGwEIP01.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: "Name"
+          Value: "NatGw01"
+
+  NatGw02:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGwEIP02.AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: "Name"
+          Value: "NatGw02"
+
+  PubRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MainVPC
+      Tags:
+        - Key: "Name"
+          Value: "PubRouteTable"
+
+  PubInternetRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGW
+
+  AssocPubSub01RT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  AssocPubSub02RT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  PrvRouteTable01:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MainVPC
+      Tags:
+        - Key: "Name"
+          Value: "PrvRouteTable01"
+
+  PrvInternetOBRoute01:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrvRouteTable01
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGw01
+
+  AssocPrvSub01RT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrvRouteTable01
+      SubnetId: !Ref PrivateSubnet1
+
+  PrvRouteTable02:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MainVPC
+      Tags:
+        - Key: "Name"
+          Value: "PrvRouteTable02"
+
+  PrvInternetOBRoute02:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrvRouteTable02
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGw01
+
+  AssocPrvSub02RT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrvRouteTable02
+      SubnetId: !Ref PrivateSubnet2
+
+  LBSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to our load balancer
+      VpcId: !Ref MainVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:        
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+  
+  ServerSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to our hosts and SSHfrom local only
+      VpcId: !Ref MainVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+
+  DBSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: The SG for the DB
+      VpcId: !Ref MainVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+        
+
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          yum install -y git
+          yum install -y php
+          yum install -y php-mysqli
+          amazon-linux-extras install php7.4
+          systemctl start httpd
+          systemctl enable httpd
+          cd /var/www/html
+          curl -o index.php https://raw.githubusercontent.com/CptBazinga/HAProject/main/index.php
+          curl -o insert.php https://raw.githubusercontent.com/CptBazinga/HAProject/main/insert.php
+      ImageId: ami-06616b7884ac98cdd
+      SecurityGroups:
+        - !Ref ServerSecGroup
+      InstanceType: t2.micro
+      LaunchConfigurationName: HAProjectConfig
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdm
+          Ebs: 
+            VolumeSize: '8'
+
+  ServersAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties: 
+      LaunchConfigurationName: !Ref LaunchConfig
+      MinSize: '2'
+      MaxSize: '3'
+      VPCZoneIdentifier: 
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      TargetGroupARNs:
+        - !Ref LBTargetGroup
+
+  LB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups: 
+        - !Ref LBSecGroup
+
+  LBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: 
+            !Ref LBTargetGroup
+      LoadBalancerArn:
+        !Ref LB
+      Port: '80'
+      Protocol: HTTP
+
+  LBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions: 
+        - Type: forward
+          TargetGroupArn: !Ref LBTargetGroup
+      Conditions:
+        - Field: path-pattern
+          Values: [/]
+      ListenerArn: !Ref LBListener
+      Priority: 1
+
+  LBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: !Ref MainVPC
+
+  database1:
+    Type: AWS::RDS::DBInstance
+    Properties: 
+      AllocatedStorage: 20
+      AllowMajorVersionUpgrade: true
+      AutoMinorVersionUpgrade: true
+      AvailabilityZone: eu-central-1a
+      DBInstanceClass: db.t3.micro
+      DBInstanceIdentifier: database-1
+      DBName: myDB
+      DBSecurityGroups: 
+        - !Ref DBSecGroup
+      DBSubnetGroupName: !Ref PublicSubnet1
+      Engine: MySQL
+      MasterUsername: 'admin'
+      ManageMasterUserPassword: true
+      MasterUserPassword: '12345678'
+      MaxAllocatedStorage: 22
+      NetworkType: 'IPV4'
+      Port: '3306'
+      StorageEncrypted: true
+      StorageType: 'gp2'
+      VPCSecurityGroups: 
+        - !Ref DBSecGroup
+
+
+#The Outputs
+Outputs:
+  VpcId:
+    Value: !Ref MainVPC
+    Export:
+      Name:
+        Fn::Sub: "${EnvironmentName}-VpcId"
+  PrivateSubnet1:
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name:
+        Fn::Sub: "${EnvironmentName}-PrivateSubnet1"
+  PublicSubnet1:
+    Value: !Ref PublicSubnet1
+    Export:
+      Name:
+        Fn::Sub: "${EnvironmentName}-PublicSubnet1"
+
+  PrivateSubnet2:
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name:
+        Fn::Sub: "${EnvironmentName}-PrivateSubnet2"
+  PublicSubnet2:
+    Value: !Ref PublicSubnet2
+    Export:
+      Name:
+        Fn::Sub: "${EnvironmentName}-PublicSubnet2"

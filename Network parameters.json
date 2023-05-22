@@ -1,0 +1,26 @@
+[
+    {
+    "ParameterKey": "EnvironmentName",
+    "ParameterValue": "HA-Project"
+    },
+    {
+    "ParameterKey": "VpcNetCIDR",
+    "ParameterValue": "10.0.0.0/16"
+    },
+    {
+    "ParameterKey": "PubSubnet01CIDR",
+    "ParameterValue": "10.0.1.0/24"
+    },
+    {
+    "ParameterKey": "PubSubnet02CIDR",
+    "ParameterValue": "10.0.2.0/24"
+    },
+    {
+    "ParameterKey": "PrivSubnet01CIDR",
+    "ParameterValue": "10.0.3.0/24"
+    },
+    {
+    "ParameterKey": "PrivSubnet02CIDR",
+    "ParameterValue": "10.0.0.0/24"
+    }
+]
